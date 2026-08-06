@@ -1,0 +1,291 @@
+const express = require("express");
+const path = require("path");
+const fs = require("fs");
+
+const app = express();
+const PORT = 3000;
+
+// 1. Вказуємо Express, що ми використовуємо EJS як шаблонізатор
+app.set("view engine", "ejs");
+// Явно вказуємо, що наші шаблони лежать у папці "views"
+app.set("views", path.join(__dirname, "views"));
+
+// 2. Робимо папку "public" (CSS, JS, картинки) доступною для браузера
+app.use(express.static(path.join(__dirname, "public")));
+
+// 3. Дозволяємо серверу читати дані, відправлені через HTML-форми
+app.use(express.urlencoded({ extended: true }));
+
+// --- МАРШРУТИ (РОУТИ) СТОРІНОК ---
+
+// Головна сторінка
+app.get("/", (req, res) => {
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  res.render("index", { mainText: siteSettings.mainPageText });
+});
+
+app.get("/index", (req, res) => {
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  // Читаємо файл налаштувань
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  // Передаємо текст у шаблон index.ejs
+  res.render("index", { mainText: siteSettings.mainPageText });
+});
+
+app.get("/pro-nas", (req, res) => {
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  // Читаємо файл налаштувань
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  // Передаємо текст у шаблон
+  res.render("pro-nas", { pronasText: siteSettings.pronasText });
+});
+
+// Сторінка новин (зчитує дані з JSON)
+app.get("/novyny", (req, res) => {
+  const dataPath = path.join(__dirname, "data", "novyny.json");
+
+  fs.readFile(dataPath, "utf8", (err, data) => {
+    if (err) {
+      console.error("Помилка читання файлу новин:", err);
+      // Якщо файлу ще немає, передаємо порожній масив, щоб не зламати сторінку
+      return res.render("novyny", { newsList: [] });
+    }
+
+    try {
+      const parsedData = JSON.parse(data);
+      const allNews = parsedData.items || [];
+      // Відфільтровуємо лише активні новини (неархівовані)
+      const activeNews = allNews.filter((item) => !item.archived);
+
+      // Віддаємо шаблон news.ejs і передаємо туди масив новин
+      res.render("novyny", { newsList: activeNews });
+    } catch (parseError) {
+      console.error("Помилка парсингу JSON:", parseError);
+      res.render("novyny", { newsList: [] });
+    }
+  });
+});
+
+// Роут для сторінки Адміністрації
+app.get("/administracia", (req, res) => {
+  const teamPath = path.join(__dirname, "data", "colectyv.json");
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  // Читаємо файл налаштувань
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  fs.readFile(teamPath, "utf8", (err, data) => {
+    if (err) {
+      return res.render("administracia", { adminList: [], banner: "" });
+    }
+
+    try {
+      const parsedData = JSON.parse(data);
+      const allStaff = parsedData.items || [];
+
+      // Сортуємо працівників
+      const adminList = allStaff.filter(
+        (person) => person.category === "admin",
+      );
+
+      // Передаємо
+      res.render("administracia", {
+        adminList: adminList,
+        banner: siteSettings.adminBanner,
+      });
+    } catch (error) {
+      console.error("Помилка парсингу працівників:", error);
+      res.render("administracia", { adminList: [], banner: "" });
+    }
+  });
+});
+
+// Роут для сторінки Кафедри (Вчителі)
+app.get("/kafedry", (req, res) => {
+  const teamPath = path.join(__dirname, "data", "colectyv.json");
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  // Читаємо файл налаштувань
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  fs.readFile(teamPath, "utf8", (err, data) => {
+    if (err) {
+      return res.render("kafedry", { teacherList: [], banner: "" });
+    }
+
+    try {
+      const parsedData = JSON.parse(data);
+      const allStaff = parsedData.items || [];
+
+      // Сортуємо працівників
+      const teacherList = allStaff.filter(
+        (person) => person.category === "teacher",
+      );
+
+      // Передаємо у шаблон kafedry.ejs
+      res.render("kafedry", {
+        teacherList: teacherList,
+        banner: siteSettings.kafedryBanner,
+      });
+    } catch (error) {
+      console.error("Помилка парсингу працівників:", error);
+      res.render("kafedry", { teacherList: [], banner: "" });
+    }
+  });
+});
+
+// Сторінка галереї
+app.get("/galereia", (req, res) => {
+  const galleryPath = path.join(__dirname, "data", "galereia.json");
+
+  fs.readFile(galleryPath, "utf8", (err, data) => {
+    // Якщо файлу раптом немає, або сталася помилка читання - віддаємо порожній список
+    if (err) {
+      return res.render("galereia", { galleryList: [] });
+    }
+
+    try {
+      // Парсимо JSON
+      const parsedData = JSON.parse(data);
+      // Беремо масив items. Якщо він порожній або його немає, використовуємо []
+      const photos = parsedData.items || [];
+
+      // Передаємо фотографії у шаблон galereia.ejs
+      res.render("galereia", { galleryList: photos });
+    } catch (error) {
+      console.error("Помилка парсингу галереї:", error);
+      res.render("galereia", { galleryList: [] });
+    }
+  });
+});
+
+// Сторінка контактів
+app.get("/contacty", (req, res) => {
+  res.render("contacty");
+});
+
+// Роут для окремої сторінки новини
+app.get("/novyny/:id", (req, res) => {
+  const newsId = req.params.id; // Отримуємо ID з посилання (наприклад, pershyj-dzvonyk-2026)
+  const dataPath = path.join(__dirname, "data", "novyny.json");
+
+  fs.readFile(dataPath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).send("Помилка читання бази новин.");
+    }
+
+    try {
+      const parsedData = JSON.parse(data);
+      const allNews = parsedData.items || [];
+
+      // Шукаємо новину, у якої id збігається з тим, що в адресному рядку
+      const foundArticle = allNews.find((item) => item.id === newsId);
+
+      if (foundArticle) {
+        // Якщо знайшли - віддаємо шаблон і передаємо туди цю новину
+        res.render("new", { article: foundArticle });
+      } else {
+        // Якщо такої новини немає
+        res.status(404).send("<h1>Помилка 404: Новину не знайдено</h1>");
+      }
+    } catch (parseError) {
+      console.error("Помилка парсингу новин:", parseError);
+      res.status(500).send("Внутрішня помилка сервера.");
+    }
+  });
+});
+
+app.get("/:pageName", (req, res) => {
+  const page = req.params.pageName;
+  const docsPath = path.join(__dirname, "data", "doc.json");
+
+  fs.readFile(docsPath, "utf8", (err, data) => {
+    let filteredDocs = []; // За замовчуванням порожній список
+
+    if (!err) {
+      try {
+        const parsedData = JSON.parse(data);
+        const allDocs = parsedData.items || [];
+        // ФІЛЬТРУЄМО: залишаємо тільки ті документи, категорія яких дорівнює назві сторінки!
+        filteredDocs = allDocs.filter((doc) => doc.category === page);
+      } catch (e) {
+        console.error("Помилка парсингу документів:", e);
+      }
+    }
+
+    // Рендеримо сторінку і передаємо їй відфільтровані документи у змінну docsList
+    res.render(page, { docsList: filteredDocs }, (renderErr, html) => {
+      if (renderErr) {
+        console.error(`Сторінку ${page}.ejs не знайдено.`);
+        res.status(404).send("<h1>Помилка 404: Сторінку не знайдено</h1>");
+      } else {
+        res.send(html);
+      }
+    });
+  });
+});
+
+// --- ОБРОБКА ФОРМИ ЗВОРОТНОГО ЗВ'ЯЗКУ ---
+app.post("/send-message", (req, res) => {
+  const { name, email, message } = req.body;
+
+  // Виводимо дані в термінал (пізніше тут буде логіка відправки на пошту)
+  console.log("--- НОВЕ ПОВІДОМЛЕННЯ ---");
+  console.log(`Ім'я: ${name}`);
+  console.log(`Email: ${email}`);
+  console.log(`Текст: ${message}`);
+  console.log("-------------------------");
+
+  // Відправляємо просту красиву відповідь користувачу
+  res.send(`
+    <div style="font-family: 'Open Sans', sans-serif; text-align: center; margin-top: 10dvh;">
+      <h1 style="color: #8a2be2; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Дякуємо, ${name}!</h1>
+      <p style="font-size: 18px;">Ваше повідомлення успішно надіслано.</p>
+      <br>
+      <a href="/contacty" style="display: inline-block; padding: 10px 20px; background-color: #1a2545; color: white; text-decoration: none; border-radius: 6px;">Повернутися назад</a>
+    </div>
+  `);
+});
+
+// --- ЗАПУСК СЕРВЕРА ---
+app.listen(PORT, () => {
+  console.log(`Сервер успішно запущено`);
+  console.log(`Перейдіть у браузері за адресою: http://localhost:${PORT}`);
+});
