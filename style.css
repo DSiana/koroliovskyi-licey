@@ -19,7 +19,7 @@ header {
   min-height: 15dvh;
   justify-content: space-between;
   align-items: center;
-  background-image: url("/assets/images/cosmos-1.png");
+  background-image: url("cosmos-1.png");
   background-size: cover;
   background-position: center center;
 }
