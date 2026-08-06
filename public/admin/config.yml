@@ -1,0 +1,144 @@
+backend:
+  name: github
+  repo: DSiana/koroliovskyi-licey
+  branch: main
+
+# Куди адмінка зберігатиме завантажені вами картинки та PDF-файли
+media_folder: "public/assets/images"
+public_folder: "/assets/images"
+
+collections:
+  # ==========================================
+  # 1. НАЛАШТУВАННЯ САЙТУ (settings.json)
+  # ==========================================
+  - name: "settings"
+    label: "Налаштування сторінок"
+    files:
+      - label: "Головні налаштування"
+        name: "main_settings"
+        file: "data/settings.json"
+        fields:
+          - {
+              label: "Текст на головній сторінці",
+              name: "mainPageText",
+              widget: "markdown",
+            }
+          - {
+              label: "Текст на сторінці про заклад",
+              name: "pronasText",
+              widget: "markdown",
+            }
+          - {
+              label: "Банер для Адміністрації",
+              name: "adminBanner",
+              widget: "image",
+            }
+          - {
+              label: "Банер для Кафедри",
+              name: "kafedryBanner",
+              widget: "image",
+            }
+
+  # ==========================================
+  # 2. НОВИНИ (novyny.json)
+  # ==========================================
+  - name: "news"
+    label: "Новини"
+    files:
+      - label: "База новин"
+        name: "news_data"
+        file: "data/novyny.json"
+        fields:
+          - label: "Список новин"
+            name: "items" # CMS запише всі новини у цей масив
+            widget: "list"
+            fields:
+              - {
+                  label: "ID (англійською, без пробілів, напр: svyato-vesny)",
+                  name: "id",
+                  widget: "string",
+                }
+              - { label: "Заголовок", name: "title", widget: "string" }
+              - { label: "Дата", name: "date", widget: "string" }
+              - { label: "Зображення", name: "image", widget: "image" }
+              - { label: "Короткий опис", name: "summary", widget: "text" }
+              - { label: "Повний текст", name: "content", widget: "markdown" }
+              - {
+                  label: "В архіві? (приховати)",
+                  name: "archived",
+                  widget: "boolean",
+                  default: false,
+                }
+
+  # ==========================================
+  # 3. КОЛЕКТИВ (colectyv.json)
+  # ==========================================
+  - name: "team"
+    label: "Колектив (Працівники)"
+    files:
+      - label: "База працівників"
+        name: "team_data"
+        file: "data/colectyv.json"
+        fields:
+          - label: "Список працівників"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "ПІБ", name: "pib", widget: "string" }
+              - { label: "Посада", name: "position", widget: "string" }
+              - { label: "Фото", name: "image", widget: "image" }
+              - label: "Категорія (Куди додати?)"
+                name: "category"
+                widget: "select"
+                options:
+                  - { label: "Адміністрація", value: "admin" }
+                  - { label: "Вчитель / Кафедра", value: "teacher" }
+
+  # ==========================================
+  # 4. ДОКУМЕНТИ (doc.json)
+  # ==========================================
+  - name: "documents"
+    label: "Документи сайту"
+    media_folder: "/public/assets/docs"
+    public_folder: "/assets/docs"
+    files:
+      - label: "База документів"
+        name: "doc_data"
+        file: "data/doc.json"
+        fields:
+          - label: "Список файлів"
+            name: "items"
+            widget: "list"
+            fields:
+              - {
+                  label: "Назва (напр: Статут ліцею)",
+                  name: "title",
+                  widget: "string",
+                }
+              - { label: "Файл (PDF)", name: "url", widget: "file" }
+              - {
+                  label: "Сторінка (напр: ustanovchi-doc або finansovi-doc)",
+                  name: "category",
+                  widget: "string",
+                }
+  # ==========================================
+  # 5. ГАЛЕРЕЯ (galereia.json)
+  # ==========================================
+  - name: "gallery"
+    label: "Галерея"
+    files:
+      - label: "База фотографій"
+        name: "gallery_data"
+        file: "data/galereia.json"
+        fields:
+          - label: "Список фотографій"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "Фотографія", name: "url", widget: "image" }
+              - {
+                  label: "Опис фото (alt-текст для слабозорих)",
+                  name: "alt",
+                  widget: "string",
+                  required: false,
+                }
