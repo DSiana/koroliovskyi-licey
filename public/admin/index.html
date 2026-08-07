@@ -6,6 +6,19 @@
     <title>Адмін-панель Ліцею</title>
   </head>
   <body>
+    <script>
+      window.addEventListener("message", (event) => {
+        // Відфільтровуємо зайвий системний шум від плагінів браузера
+        if (
+          typeof event.data === "string" &&
+          event.data.includes("authorization:github")
+        ) {
+          console.log("🚨 ШПИГУН УПІЙМАВ ПОВІДОМЛЕННЯ!");
+          console.log("Від кого (origin):", event.origin);
+          console.log("Текст повідомлення:", event.data);
+        }
+      });
+    </script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   </body>
 </html>
