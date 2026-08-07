@@ -306,47 +306,16 @@ app.get("/callback", async (req, res) => {
       `);
     }
 
-    // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
-    // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
-    // Оновлений скрипт для /callback
     const script = `
-      <!DOCTYPE html>
-      <html lang="uk">
-      <head>
-        <meta charset="UTF-8">
-        <title>Авторизація...</title>
-        <style>
-          body { font-family: 'Open Sans', sans-serif; background-color: #1a1a24; color: #e0e0e0; text-align: center; padding-top: 50px; }
-          h2 { color: #8a2be2; }
-        </style>
-      </head>
-      <body>
-        <h2>Авторизація успішна!</h2>
-        <p id="status">Передаємо ключ у головне вікно...</p>
-        <script>
-          (function() {
-            try {
-              const token = "${tokenData.access_token}";
-              const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
-              
-              if (window.opener) {
-                // Відправляємо повідомлення точно на адресу вашого сайту
-                window.opener.postMessage(message, "http://localhost:3000");
-                document.getElementById("status").innerHTML = "Дані успішно відправлено! <br><br> Якщо ця вкладка не закрилася автоматично, просто закрийте її та поверніться до адмінки.";
-                
-                setTimeout(() => {
-                  window.close();
-                }, 1000);
-              } else {
-                document.getElementById("status").innerHTML = '<span style="color: #ff4d4d;">Помилка: Втрачено зв\\'язок із головною вкладкою.</span>';
-              }
-            } catch (err) {
-              document.getElementById("status").innerText = "Помилка скрипта: " + err.message;
-            }
-          })();
-        </script>
-      </body>
-      </html>
+      <script>
+        const token = "${tokenData.access_token}";
+        const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
+        
+        if (window.opener) {
+          window.opener.postMessage(message, "http://localhost:3000");
+          window.close(); // Закриваємо одразу без затримки
+        }
+      </script>
     `;
     res.send(script);
   } catch (error) {
