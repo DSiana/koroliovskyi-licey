@@ -308,6 +308,7 @@ app.get("/callback", async (req, res) => {
 
     // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
     // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
+    // Оновлений скрипт для /callback
     const script = `
       <!DOCTYPE html>
       <html lang="uk">
@@ -321,19 +322,26 @@ app.get("/callback", async (req, res) => {
       </head>
       <body>
         <h2>Авторизація успішна!</h2>
-        <p>Передаємо дані в адмінку. Це вікно має закритися автоматично...</p>
+        <p id="status">Передаємо ключ у головне вікно...</p>
         <script>
           (function() {
-            const message = 'authorization:github:success:{"token":"${tokenData.access_token}","provider":"github"}';
-            
-            if (window.opener) {
-              window.opener.postMessage(message, '*');
-              // Даємо браузеру пів секунди на відправку перед тим, як закрити вікно
-              setTimeout(() => {
-                window.close();
-              }, 500);
-            } else {
-              document.body.innerHTML += '<p style="color: #ff4d4d;">Помилка: Не вдалося знайти головне вікно. Переконайтеся, що ви не закрили вкладку з адмінкою.</p>';
+            try {
+              const token = "${tokenData.access_token}";
+              const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
+              
+              if (window.opener) {
+                // Відправляємо повідомлення точно на адресу вашого сайту
+                window.opener.postMessage(message, "http://localhost:3000");
+                document.getElementById("status").innerHTML = "Дані успішно відправлено! <br><br> Якщо ця вкладка не закрилася автоматично, просто закрийте її та поверніться до адмінки.";
+                
+                setTimeout(() => {
+                  window.close();
+                }, 1000);
+              } else {
+                document.getElementById("status").innerHTML = '<span style="color: #ff4d4d;">Помилка: Втрачено зв\\'язок із головною вкладкою.</span>';
+              }
+            } catch (err) {
+              document.getElementById("status").innerText = "Помилка скрипта: " + err.message;
             }
           })();
         </script>
