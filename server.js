@@ -1,3 +1,5 @@
+require("dotenv").config();
+const nodemailer = require("nodemailer");
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
@@ -88,6 +90,25 @@ app.get("/novyny", (req, res) => {
       console.error("Помилка парсингу JSON:", parseError);
       res.render("novyny", { newsList: [] });
     }
+  });
+});
+
+app.get("/director", (req, res) => {
+  const settingsPath = path.join(__dirname, "data", "settings.json");
+
+  let siteSettings = {};
+  try {
+    const settingsData = fs.readFileSync(settingsPath, "utf8");
+    siteSettings = JSON.parse(settingsData);
+  } catch (err) {
+    console.error("Помилка читання налаштувань:", err);
+  }
+
+  // Передаємо текст у шаблон
+  res.render("director", {
+    directorPhoto: siteSettings.directorPhoto,
+    directorPIB: siteSettings.directorPIB,
+    directorText: siteSettings.directorText,
   });
 });
 
@@ -263,25 +284,48 @@ app.get("/:pageName", (req, res) => {
 });
 
 // --- ОБРОБКА ФОРМИ ЗВОРОТНОГО ЗВ'ЯЗКУ ---
-app.post("/send-message", (req, res) => {
+app.post("/send-message", async (req, res) => {
   const { name, email, message } = req.body;
 
-  // Виводимо дані в термінал (пізніше тут буде логіка відправки на пошту)
-  console.log("--- НОВЕ ПОВІДОМЛЕННЯ ---");
-  console.log(`Ім'я: ${name}`);
-  console.log(`Email: ${email}`);
-  console.log(`Текст: ${message}`);
-  console.log("-------------------------");
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
 
-  // Відправляємо просту красиву відповідь користувачу
-  res.send(`
-    <div style="font-family: 'Open Sans', sans-serif; text-align: center; margin-top: 10dvh;">
-      <h1 style="color: #8a2be2; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Дякуємо, ${name}!</h1>
-      <p style="font-size: 18px;">Ваше повідомлення успішно надіслано.</p>
-      <br>
-      <a href="/contacty" style="display: inline-block; padding: 10px 20px; background-color: #1a2545; color: white; text-decoration: none; border-radius: 6px;">Повернутися назад</a>
-    </div>
-  `);
+  try {
+    // 2. Формуємо та відправляємо сам лист
+    await transporter.sendMail({
+      from: `"Сайт Ліцею" <${process.env.EMAIL_USER}>`,
+      to: "a.liceumzt@gmail.com",
+      subject: `Нове повідомлення з сайту від ${name}`,
+      html: `
+        <h3 style="color: #8a2be2;">Нове повідомлення через форму контактів</h3>
+        <p><strong>Ім'я:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Повідомлення:</strong><br>${message}</p>
+      `,
+    });
+
+    // 3. Відправляємо красиву відповідь користувачу
+    res.send(`
+      <div style="font-family: 'Open Sans', sans-serif; text-align: center; margin-top: 10dvh; background-color: #1a1a24; padding: 40px; border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <h1 style="color: #8a2be2; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Дякуємо, ${name}!</h1>
+        <p style="font-size: 18px; color: #e0e0e0;">Ваше повідомлення успішно надіслано.</p>
+        <br>
+        <a href="/contacty" style="display: inline-block; padding: 10px 20px; background-color: #5a189a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Повернутися назад</a>
+      </div>
+    `);
+  } catch (error) {
+    console.error("Помилка відправки листа:", error);
+    res
+      .status(500)
+      .send(
+        "Вибачте, сталася помилка при відправці повідомлення. Спробуйте пізніше.",
+      );
+  }
 });
 
 // --- ЗАПУСК СЕРВЕРА ---
