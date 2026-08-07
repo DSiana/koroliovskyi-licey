@@ -19,6 +19,13 @@ collections:
         name: "main_settings"
         file: "data/settings.json"
         fields:
+          - { label: "Фото директора", name: "directorPhoto", widget: "image" }
+          - { label: "ПІБ директора", name: "directorPIB", widget: "string" }
+          - {
+              label: "Опис директора",
+              name: "directorText",
+              widget: "markdown",
+            }
           - {
               label: "Текст на головній сторінці",
               name: "mainPageText",
@@ -60,7 +67,12 @@ collections:
                   widget: "string",
                 }
               - { label: "Заголовок", name: "title", widget: "string" }
-              - { label: "Дата", name: "date", widget: "string" }
+              - label: "Дата публікації"
+                name: "date"
+                widget: "datetime"
+                format: "DD.MM.YYYY"
+                date_format: "DD.MM.YYYY"
+                time_format: false
               - { label: "Зображення", name: "image", widget: "image" }
               - { label: "Короткий опис", name: "summary", widget: "text" }
               - { label: "Повний текст", name: "content", widget: "markdown" }
@@ -75,7 +87,7 @@ collections:
   # 3. КОЛЕКТИВ (colectyv.json)
   # ==========================================
   - name: "team"
-    label: "Колектив (Працівники)"
+    label: "Колектив"
     files:
       - label: "База працівників"
         name: "team_data"
@@ -93,7 +105,7 @@ collections:
                 widget: "select"
                 options:
                   - { label: "Адміністрація", value: "admin" }
-                  - { label: "Вчитель / Кафедра", value: "teacher" }
+                  - { label: "Вчитель", value: "teacher" }
 
   # ==========================================
   # 4. ДОКУМЕНТИ (doc.json)
@@ -117,11 +129,33 @@ collections:
                   widget: "string",
                 }
               - { label: "Файл (PDF)", name: "url", widget: "file" }
-              - {
-                  label: "Сторінка (напр: ustanovchi-doc або finansovi-doc)",
-                  name: "category",
-                  widget: "string",
-                }
+              - label: "Категорія (На якій сторінці показати документ?)"
+                name: "category"
+                widget: "select"
+                options:
+                  - { label: "Державні закупівлі", value: "derzh-zak" }
+                  - { label: "Досягнення", value: "dosiagnenia" }
+                  - { label: "Фінансові документи", value: "finansovi-doc" }
+                  - { label: "Кадровий склад", value: "kadrovyj-sklad" }
+                  - { label: "Методична робота", value: "metodychna-robota" }
+                  - { label: "НУШ", value: "nush" }
+                  - { label: "Освітня діяльність", value: "osvitnya-diyalnist" }
+                  - { label: "Проєкти", value: "projekty" }
+                  - { label: "Сторінка психолога", value: "psiholoh" }
+                  - { label: "Стоп насильство", value: "stop-nasylstvo" }
+                  - { label: "Структура", value: "struktura" }
+                  - { label: "Територія", value: "terytoriya" }
+                  - { label: "Умови доступності", value: "umovy-dostupnosti" }
+                  - { label: "Установчі документи", value: "ustanovchi-doc" }
+                  - { label: "Вступ", value: "vstup" }
+                  - { label: "Виховна робота", value: "vyhovna-robota" }
+                  - { label: "Звіти", value: "zvity" }
+              - label: "Дата публікації"
+                name: "date"
+                widget: "datetime"
+                format: "DD.MM.YYYY"
+                date_format: "DD.MM.YYYY"
+                time_format: false
   # ==========================================
   # 5. ГАЛЕРЕЯ (galereia.json)
   # ==========================================
@@ -138,7 +172,7 @@ collections:
             fields:
               - { label: "Фотографія", name: "url", widget: "image" }
               - {
-                  label: "Опис фото (alt-текст для слабозорих)",
+                  label: "Опис фото (alt-текст)",
                   name: "alt",
                   widget: "string",
                   required: false,
