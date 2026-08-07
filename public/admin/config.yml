@@ -3,7 +3,8 @@ backend:
   name: github
   repo: DSiana/koroliovskyi-licey
   branch: main
-  base_url: "http://localhost:3000"
+  base_url: http://localhost:3000
+  auth_endpoint: auth
 
 # Куди адмінка зберігатиме завантажені вами картинки та PDF-файли
 media_folder: "public/assets/images"
