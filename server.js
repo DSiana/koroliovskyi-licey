@@ -331,6 +331,56 @@ app.post("/send-message", async (req, res) => {
   }
 });
 
+// ==========================================
+// АВТОРИЗАЦІЯ DECAP CMS ЧЕРЕЗ GITHUB (OAuth)
+// ==========================================
+
+// 1. Відправляємо адміністратора на сторінку логіну GitHub
+app.get("/auth", (req, res) => {
+  const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=repo`;
+  res.redirect(githubAuthUrl);
+});
+
+// 2. GitHub повертає нас сюди з тимчасовим кодом, який ми міняємо на токен доступу
+app.get("/callback", async (req, res) => {
+  const code = req.query.code;
+  if (!code) return res.send("Помилка: Немає коду від GitHub");
+
+  try {
+    // Обмінюємо код на токен доступу
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          client_id: process.env.GITHUB_CLIENT_ID,
+          client_secret: process.env.GITHUB_CLIENT_SECRET,
+          code: code,
+        }),
+      },
+    );
+
+    const tokenData = await tokenResponse.json();
+
+    // Відправляємо токен назад у спливаюче вікно адмінки
+    const script = `
+      <script>
+        const message = 'authorization:github:success:{"token":"${tokenData.access_token}","provider":"github"}';
+        window.opener.postMessage(message, '*');
+        window.close();
+      </script>
+    `;
+    res.send(script);
+  } catch (error) {
+    console.error("Помилка авторизації:", error);
+    res.send("Помилка під час з'єднання з GitHub.");
+  }
+});
+
 // --- ЗАПУСК СЕРВЕРА ---
 app.listen(PORT, () => {
   console.log(`Сервер успішно запущено`);
