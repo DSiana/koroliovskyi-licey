@@ -111,7 +111,7 @@
           />
         </div>
         <h3 class="main-headline"><%= article.title %></h3>
-        <div><p><%- article.content %></p></div>
+        <div><p><%- marked(article.content) %></p></div>
         <p>Опубліковано: <%= article.date %></p>
       </div>
     </div>
