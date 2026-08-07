@@ -154,6 +154,10 @@ a {
   flex-direction: row;
 }
 
+.dirtext {
+  padding-top: 3dvh;
+}
+
 .photo-new-id {
   width: 100%;
   height: 25dvh;
