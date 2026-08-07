@@ -307,12 +307,38 @@ app.get("/callback", async (req, res) => {
     }
 
     // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
+    // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
     const script = `
-      <script>
-        const message = 'authorization:github:success:{"token":"${tokenData.access_token}","provider":"github"}';
-        window.opener.postMessage(message, '*');
-        window.close();
-      </script>
+      <!DOCTYPE html>
+      <html lang="uk">
+      <head>
+        <meta charset="UTF-8">
+        <title>Авторизація...</title>
+        <style>
+          body { font-family: 'Open Sans', sans-serif; background-color: #1a1a24; color: #e0e0e0; text-align: center; padding-top: 50px; }
+          h2 { color: #8a2be2; }
+        </style>
+      </head>
+      <body>
+        <h2>Авторизація успішна!</h2>
+        <p>Передаємо дані в адмінку. Це вікно має закритися автоматично...</p>
+        <script>
+          (function() {
+            const message = 'authorization:github:success:{"token":"${tokenData.access_token}","provider":"github"}';
+            
+            if (window.opener) {
+              window.opener.postMessage(message, '*');
+              // Даємо браузеру пів секунди на відправку перед тим, як закрити вікно
+              setTimeout(() => {
+                window.close();
+              }, 500);
+            } else {
+              document.body.innerHTML += '<p style="color: #ff4d4d;">Помилка: Не вдалося знайти головне вікно. Переконайтеся, що ви не закрили вкладку з адмінкою.</p>';
+            }
+          })();
+        </script>
+      </body>
+      </html>
     `;
     res.send(script);
   } catch (error) {
