@@ -1,4 +1,6 @@
 require("dotenv").config();
+const { marked } = require("marked");
+app.locals.marked = marked;
 const nodemailer = require("nodemailer");
 const express = require("express");
 const path = require("path");
