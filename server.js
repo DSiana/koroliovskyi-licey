@@ -311,11 +311,11 @@ app.post("/send-message", async (req, res) => {
 
     // 3. Відправляємо красиву відповідь користувачу
     res.send(`
-      <div style="font-family: 'Open Sans', sans-serif; text-align: center; margin-top: 10dvh; background-color: #1a1a24; padding: 40px; border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
-        <h1 style="color: #8a2be2; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Дякуємо, ${name}!</h1>
-        <p style="font-size: 18px; color: #e0e0e0;">Ваше повідомлення успішно надіслано.</p>
+      <div style="font-family: 'Open Sans', sans-serif; text-align: center; margin-top: 10dvh; background-color: #f8f8f6ff; padding: 40px; border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;">
+        <h1 style="color: #1a2545ff; font-family: 'Oswald', sans-serif; text-transform: uppercase;">Дякуємо, ${name}!</h1>
+        <p style="font-size: 18px; color: #f8f8f6ff;">Ваше повідомлення успішно надіслано.</p>
         <br>
-        <a href="/contacty" style="display: inline-block; padding: 10px 20px; background-color: #5a189a; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Повернутися назад</a>
+        <a href="/contacty" style="display: inline-block; padding: 10px 20px; background-color: #1a2545ff; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">Повернутися назад</a>
       </div>
     `);
   } catch (error) {
