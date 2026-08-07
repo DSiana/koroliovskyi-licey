@@ -267,6 +267,7 @@ app.get("/auth", (req, res) => {
 });
 
 // 2. GitHub повертає нас сюди з тимчасовим кодом, який ми міняємо на токен доступу
+// 2. GitHub повертає нас сюди з тимчасовим кодом, який ми міняємо на токен доступу
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.send("Помилка: Немає коду від GitHub");
@@ -286,12 +287,26 @@ app.get("/callback", async (req, res) => {
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code: code,
         }),
-      },
+      }
     );
 
     const tokenData = await tokenResponse.json();
 
-    // Відправляємо токен назад у спливаюче вікно адмінки
+    // ВИВОДИМО ВІДПОВІДЬ GITHUB У ТЕРМІНАЛ
+    console.log("--- ВІДПОВІДЬ ВІД GITHUB ---");
+    console.log(tokenData);
+    console.log("----------------------------");
+
+    // Якщо GitHub повернув помилку замість токена
+    if (tokenData.error) {
+      return res.send(`
+        <h2 style="color: red;">Помилка від GitHub</h2>
+        <p><strong>Тип:</strong> ${tokenData.error}</p>
+        <p><strong>Опис:</strong> ${tokenData.error_description}</p>
+      `);
+    }
+
+    // Якщо все добре, відправляємо токен назад у спливаюче вікно адмінки
     const script = `
       <script>
         const message = 'authorization:github:success:{"token":"${tokenData.access_token}","provider":"github"}';
