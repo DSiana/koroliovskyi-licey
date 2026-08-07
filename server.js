@@ -1,6 +1,4 @@
 require("dotenv").config();
-const { marked } = require("marked");
-app.locals.marked = marked;
 const nodemailer = require("nodemailer");
 const express = require("express");
 const path = require("path");
@@ -8,6 +6,9 @@ const fs = require("fs");
 
 const app = express();
 const PORT = 3000;
+
+const { marked } = require("marked");
+app.locals.marked = marked;
 
 // 1. Вказуємо Express, що ми використовуємо EJS як шаблонізатор
 app.set("view engine", "ejs");
