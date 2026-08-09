@@ -308,31 +308,17 @@ app.get("/callback", async (req, res) => {
 
     const script = `
       <!DOCTYPE html>
-      <html lang="uk">
-      <head>
-        <meta charset="UTF-8">
-        <title>Авторизація</title>
-        <style>
-          body { 
-            background-color: #1a0b2e; 
-            color: #d1b3ff; 
-            font-family: sans-serif; 
-            text-align: center; 
-            padding-top: 50px; 
-          }
-        </style>
-      </head>
-      <body>
-        <h2 id="status">Перевірка зв'язку...</h2>
+      <html>
+      <body style="background-color: #1a0b2e; color: #d1b3ff; font-family: sans-serif; text-align: center; padding-top: 50px;">
+        <h2>Авторизація успішна! Входимо...</h2>
         <script>
           const token = "${tokenData.access_token}";
           const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
           
           if (window.opener) {
             window.opener.postMessage(message, "*");
-            document.getElementById("status").innerText = "Токен відправлено! Поверніться на вкладку адмінки.";
-          } else {
-            document.getElementById("status").innerText = "ПОМИЛКА: Зв'язок із головним вікном втрачено (window.opener is null).";
+            // Закриваємо вікно через 500 мілісекунд, щоб головне вікно точно прийняло токен
+            setTimeout(function() { window.close(); }, 500);
           }
         </script>
       </body>
