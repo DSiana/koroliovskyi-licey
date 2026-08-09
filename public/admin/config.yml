@@ -3,8 +3,7 @@ backend:
   name: github
   repo: DSiana/koroliovskyi-licey
   branch: main
-  base_url: http://localhost:3000
-  auth_endpoint: auth
+  base_url: https://meant-var-examinations-manhattan.trycloudflare.com
 
 # Куди адмінка зберігатиме завантажені вами картинки та PDF-файли
 media_folder: "public/assets/images"
