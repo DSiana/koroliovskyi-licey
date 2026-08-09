@@ -294,7 +294,11 @@ app.get("/callback", async (req, res) => {
 
     // ВИВОДИМО ВІДПОВІДЬ GITHUB У ТЕРМІНАЛ
     console.log("--- ВІДПОВІДЬ ВІД GITHUB ---");
-    console.log(tokenData);
+    console.log({
+      token_type: tokenData.token_type,
+      scope: tokenData.scope,
+      has_access_token: !!tokenData.access_token,
+    });
     console.log("----------------------------");
 
     // Якщо GitHub повернув помилку замість токена
