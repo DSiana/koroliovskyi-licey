@@ -266,8 +266,6 @@ app.get("/auth", (req, res) => {
   res.redirect(githubAuthUrl);
 });
 
-// 2. GitHub повертає нас сюди з тимчасовим кодом, який ми міняємо на токен доступу
-// 2. GitHub повертає нас сюди з тимчасовим кодом, який ми міняємо на токен доступу
 app.get("/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.send("Помилка: Немає коду від GitHub");
@@ -287,7 +285,7 @@ app.get("/callback", async (req, res) => {
           client_secret: process.env.GITHUB_CLIENT_SECRET,
           code: code,
         }),
-      }
+      },
     );
 
     const tokenData = await tokenResponse.json();
@@ -318,14 +316,29 @@ app.get("/callback", async (req, res) => {
       <title>GitHub Authorization</title>
     </head>
     <body>
-      <p>Авторизація успішна! Перевіряємо popup...</p>
+      <p>Авторизація успішна! Передаємо дані в Decap CMS...</p>
 
       <script>
-        if (window.opener) {
-          document.body.innerHTML += "<p>window.opener Є</p>";
-        } else {
-          document.body.innerHTML += "<p>window.opener НЕМАЄ</p>";
-        }
+        const receiveMessage = (message) => {
+          if (!window.opener) {
+            return;
+          }
+
+          window.opener.postMessage(
+            'authorization:github:success:${JSON.stringify({
+              token: tokenData.access_token,
+              backend: "github",
+            })}',
+            message.origin
+          );
+
+          window.removeEventListener("message", receiveMessage, false);
+          window.close();
+        };
+
+        window.addEventListener("message", receiveMessage, false);
+
+        window.opener.postMessage("authorizing:github", "*");
       </script>
     </body>
     </html>
