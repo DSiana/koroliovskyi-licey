@@ -307,15 +307,36 @@ app.get("/callback", async (req, res) => {
     }
 
     const script = `
-      <script>
-        const token = "${tokenData.access_token}";
-        const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
-        
-        if (window.opener) {
-          window.opener.postMessage(message, "*");
-          window.close(); // Закриваємо одразу без затримки
-        }
-      </script>
+      <!DOCTYPE html>
+      <html lang="uk">
+      <head>
+        <meta charset="UTF-8">
+        <title>Авторизація</title>
+        <style>
+          body { 
+            background-color: #1a0b2e; 
+            color: #d1b3ff; 
+            font-family: sans-serif; 
+            text-align: center; 
+            padding-top: 50px; 
+          }
+        </style>
+      </head>
+      <body>
+        <h2 id="status">Перевірка зв'язку...</h2>
+        <script>
+          const token = "${tokenData.access_token}";
+          const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
+          
+          if (window.opener) {
+            window.opener.postMessage(message, "*");
+            document.getElementById("status").innerText = "Токен відправлено! Поверніться на вкладку адмінки.";
+          } else {
+            document.getElementById("status").innerText = "ПОМИЛКА: Зв'язок із головним вікном втрачено (window.opener is null).";
+          }
+        </script>
+      </body>
+      </html>
     `;
     res.send(script);
   } catch (error) {
