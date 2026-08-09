@@ -318,34 +318,19 @@ app.get("/callback", async (req, res) => {
       <title>GitHub Authorization</title>
     </head>
     <body>
-      <p>Авторизація успішна. Вікно можна закрити.</p>
-    
+      <p>Авторизація успішна! Перевіряємо popup...</p>
+
       <script>
-        const receiveMessage = (message) => {
-          if (!window.opener) {
-            return;
-          }
-    
-          window.opener.postMessage(
-            'authorization:github:success:${JSON.stringify({
-              token: tokenData.access_token,
-              backend: "github"
-            })}',
-            message.origin
-          );
-    
-          window.removeEventListener("message", receiveMessage, false);
-          window.close();
-        };
-    
-        window.addEventListener("message", receiveMessage, false);
-    
-        window.opener.postMessage("authorizing:github", "*");
+        if (window.opener) {
+          document.body.innerHTML += "<p>window.opener Є</p>";
+        } else {
+          document.body.innerHTML += "<p>window.opener НЕМАЄ</p>";
+        }
       </script>
     </body>
     </html>
     `;
-    
+
     res.send(script);
   } catch (error) {
     console.error("Помилка авторизації:", error);
