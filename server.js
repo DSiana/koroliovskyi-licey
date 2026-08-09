@@ -313,12 +313,22 @@ app.get("/callback", async (req, res) => {
         <h2>Авторизація успішна! Входимо...</h2>
         <script>
           const token = "${tokenData.access_token}";
-          const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
+          const sessionData = JSON.stringify({ token: token, backend: "github" });
           
           if (window.opener) {
-            window.opener.postMessage(message, "*");
-            // Закриваємо вікно через 500 мілісекунд, щоб головне вікно точно прийняло токен
-            setTimeout(function() { window.close(); }, 500);
+            try {
+              // ПРЯМИЙ ХАК: Записуємо токен безпосередньо в пам'ять головного вікна
+              window.opener.localStorage.setItem("netlify-cms-user", sessionData);
+              window.opener.localStorage.setItem("decap-cms-user", sessionData);
+              
+              // Примусово оновлюємо головне вікно, щоб адмінка побачила токен і відкрилася
+              window.opener.location.reload();
+              
+              // Закриваємо це вікно
+              window.close();
+            } catch (error) {
+              document.body.innerHTML += "<p>Помилка: " + error.message + "</p>";
+            }
           }
         </script>
       </body>
