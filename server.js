@@ -311,33 +311,41 @@ app.get("/callback", async (req, res) => {
     }
 
     const script = `
-      <!DOCTYPE html>
-      <html>
-      <body style="background-color: #1a0b2e; color: #d1b3ff; font-family: sans-serif; text-align: center; padding-top: 50px;">
-        <h2>Авторизація успішна! Входимо...</h2>
-        <script>
-          const token = "${tokenData.access_token}";
-          const sessionData = JSON.stringify({ token: token, backend: "github" });
-          
-          if (window.opener) {
-            try {
-              // ПРЯМИЙ ХАК: Записуємо токен безпосередньо в пам'ять головного вікна
-              window.opener.localStorage.setItem("netlify-cms-user", sessionData);
-              window.opener.localStorage.setItem("decap-cms-user", sessionData);
-              
-              // Примусово оновлюємо головне вікно, щоб адмінка побачила токен і відкрилася
-              window.opener.location.reload();
-              
-              // Закриваємо це вікно
-              window.close();
-            } catch (error) {
-              document.body.innerHTML += "<p>Помилка: " + error.message + "</p>";
-            }
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>GitHub Authorization</title>
+    </head>
+    <body>
+      <p>Авторизація успішна. Вікно можна закрити.</p>
+    
+      <script>
+        const receiveMessage = (message) => {
+          if (!window.opener) {
+            return;
           }
-        </script>
-      </body>
-      </html>
+    
+          window.opener.postMessage(
+            'authorization:github:success:${JSON.stringify({
+              token: tokenData.access_token,
+              backend: "github"
+            })}',
+            message.origin
+          );
+    
+          window.removeEventListener("message", receiveMessage, false);
+          window.close();
+        };
+    
+        window.addEventListener("message", receiveMessage, false);
+    
+        window.opener.postMessage("authorizing:github", "*");
+      </script>
+    </body>
+    </html>
     `;
+    
     res.send(script);
   } catch (error) {
     console.error("Помилка авторизації:", error);
