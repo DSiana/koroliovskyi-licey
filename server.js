@@ -312,7 +312,7 @@ app.get("/callback", async (req, res) => {
         const message = 'authorization:github:success:{"token":"' + token + '","provider":"github"}';
         
         if (window.opener) {
-          window.opener.postMessage(message, "http://localhost:3000");
+          window.opener.postMessage(message, "*");
           window.close(); // Закриваємо одразу без затримки
         }
       </script>
