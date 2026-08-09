@@ -6,20 +6,6 @@
     <title>Адмін-панель Ліцею</title>
   </head>
   <body>
-    <script>
-      // Бронебійна пастка: якщо прилітає токен, самостійно зберігаємо його і пускаємо користувача
-      window.addEventListener("message", function(event) {
-        if (typeof event.data === 'string' && event.data.includes("authorization:github:success")) {
-          const tokenMatch = event.data.match(/"token":"([^"]+)"/);
-          if (tokenMatch && tokenMatch[1]) {
-            const sessionData = JSON.stringify({ token: tokenMatch[1], backend: "github" });
-            localStorage.setItem("netlify-cms-user", sessionData);
-            localStorage.setItem("decap-cms-user", sessionData);
-            window.location.reload(); // Миттєво оновлюємо сторінку для входу
-          }
-        }
-      });
-    </script>
     <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
   </body>
 </html>
