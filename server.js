@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs");
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 const { marked } = require("marked");
 app.locals.marked = marked;
@@ -289,15 +289,6 @@ app.get("/callback", async (req, res) => {
     );
 
     const tokenData = await tokenResponse.json();
-
-    // ВИВОДИМО ВІДПОВІДЬ GITHUB У ТЕРМІНАЛ
-    console.log("--- ВІДПОВІДЬ ВІД GITHUB ---");
-    console.log({
-      token_type: tokenData.token_type,
-      scope: tokenData.scope,
-      has_access_token: !!tokenData.access_token,
-    });
-    console.log("----------------------------");
 
     // Якщо GitHub повернув помилку замість токена
     if (tokenData.error) {
