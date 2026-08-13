@@ -3,16 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": "20.20.2"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "DSiana",
+  "license": "UNLICENSED",
   "type": "commonjs",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "ejs": "^6.0.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "marked": "^18.0.9",
+    "nodemailer": "^9.0.4"
   }
 }
