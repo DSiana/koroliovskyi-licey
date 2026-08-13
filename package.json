@@ -1,7 +1,7 @@
 {
-  "name": "site",
+  "name": "koroliovskyi-licey",
   "version": "1.0.0",
-  "description": "",
+  "description": "Сайт ліцею",
   "main": "server.js",
   "engines": {
     "node": "20.20.2"
