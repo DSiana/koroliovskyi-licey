@@ -3,6 +3,7 @@ const nodemailer = require("nodemailer");
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const { exec } = require("child_process");
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -418,6 +419,27 @@ app.post("/send-message", async (req, res) => {
         "Вибачте, сталася помилка при відправці повідомлення. Спробуйте пізніше.",
       );
   }
+});
+
+// --- ВЕБХУК ДЛЯ АВТОМАТИЧНОГО ОНОВЛЕННЯ З GITHUB ---
+app.post("/github-webhook", (req, res) => {
+  // 1. Проста перевірка безпеки (захист від сторонніх запитів)
+  const secret = req.query.secret;
+  if (secret !== process.env.WEBHOOK_SECRET) {
+    return res.status(403).send("Доступ заборонено. Невірний секретний ключ.");
+  }
+
+  // 2. Команда серверу затягнути нові файли
+  exec("git pull", (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Помилка Git: ${error.message}`);
+      return res.status(500).send("Помилка під час оновлення файлів.");
+    }
+
+    console.log(`Оновлення успішне: ${stdout}`);
+    // 3. Відповідь для GitHub, що все пройшло ідеально
+    res.status(200).send("Файли сайту успішно оновлено через Git!");
+  });
 });
 
 // --- ЗАПУСК СЕРВЕРА ---
