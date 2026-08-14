@@ -348,6 +348,9 @@ app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 app.get("/:pageName", (req, res) => {
   const page = req.params.pageName;
+  if (page.includes(".")) {
+    return next();
+  }
   const docsPath = path.join(__dirname, "data", "doc.json");
 
   fs.readFile(docsPath, "utf8", (err, data) => {
