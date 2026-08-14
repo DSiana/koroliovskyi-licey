@@ -13,6 +13,7 @@ app.locals.marked = marked;
 
 // 1. Вказуємо Express, що ми використовуємо EJS як шаблонізатор
 app.set("view engine", "ejs");
+app.engine("html", require("ejs").renderFile);
 // Явно вказуємо, що наші шаблони лежать у папці "views"
 app.set("views", path.join(__dirname, "views"));
 
