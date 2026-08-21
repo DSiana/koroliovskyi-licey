@@ -347,7 +347,7 @@ app.get("/callback", async (req, res) => {
 // Перехоплюємо і ігноруємо запити на іконку вкладки, щоб не "ламати" сервер
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
-app.get("/:pageName", (req, res) => {
+app.get("/:pageName", (req, res, next) => {
   const page = req.params.pageName;
   if (page.includes(".")) {
     return next();
