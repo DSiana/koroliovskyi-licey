@@ -427,23 +427,44 @@ app.post("/send-message", async (req, res) => {
 
 // --- ВЕБХУК ДЛЯ АВТОМАТИЧНОГО ОНОВЛЕННЯ З GITHUB ---
 app.post("/github-webhook", (req, res) => {
-  // 1. Проста перевірка безпеки (захист від сторонніх запитів)
   const secret = req.query.secret;
+
   if (secret !== process.env.WEBHOOK_SECRET) {
-    return res.status(403).send("Доступ заборонено. Невірний секретний ключ.");
+    return res.status(403).send("Невірний секретний ключ.");
   }
 
-  // 2. Команда серверу затягнути нові файли
-  exec("git pull", (error, stdout, stderr) => {
-    if (error) {
-      console.error(`Помилка Git: ${error.message}`);
-      return res.status(500).send("Помилка під час оновлення файлів.");
-    }
+  // GitHub отримує відповідь одразу
+  res.status(200).send("Webhook прийнято.");
 
-    console.log(`Оновлення успішне: ${stdout}`);
-    // 3. Відповідь для GitHub, що все пройшло ідеально
-    res.status(200).send("Файли сайту успішно оновлено через Git!");
-  });
+  const logFile = path.join(__dirname, "git-error.txt");
+
+  exec(
+    "git pull",
+    {
+      cwd: __dirname,
+      env: {
+        ...process.env,
+        GIT_TERMINAL_PROMPT: "0",
+      },
+    },
+    (error, stdout, stderr) => {
+      const result = [
+        `TIME: ${new Date().toISOString()}`,
+        `CWD: ${__dirname}`,
+        "",
+        `ERROR: ${error ? error.message : "none"}`,
+        `CODE: ${error ? error.code : "none"}`,
+        "",
+        "STDOUT:",
+        stdout,
+        "",
+        "STDERR:",
+        stderr,
+      ].join("\n");
+
+      fs.writeFileSync(logFile, result);
+    }
+  );
 });
 
 // --- ЗАПУСК СЕРВЕРА ---
