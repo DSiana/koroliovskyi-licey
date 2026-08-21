@@ -347,35 +347,62 @@ app.get("/callback", async (req, res) => {
 // Перехоплюємо і ігноруємо запити на іконку вкладки, щоб не "ламати" сервер
 app.get("/favicon.ico", (req, res) => res.status(204).end());
 
+// --- УНІВЕРСАЛЬНИЙ РОУТ ДЛЯ ДИНАМІЧНИХ СТОРІНОК ---
+
 app.get("/:pageName", (req, res, next) => {
   const page = req.params.pageName;
+
+  // Не намагаємося рендерити файли типу .css, .js, .png тощо.
+  // express.static вже мав можливість їх обробити.
   if (page.includes(".")) {
     return next();
   }
+
+  // Дозволяємо тільки безпечні назви сторінок:
+  // літери, цифри, дефіс та підкреслення.
+  if (!/^[a-zA-Z0-9_-]+$/.test(page)) {
+    return res.status(404).send("<h1>404: Сторінку не знайдено</h1>");
+  }
+
   const docsPath = path.join(__dirname, "data", "doc.json");
 
   fs.readFile(docsPath, "utf8", (err, data) => {
-    let filteredDocs = []; // За замовчуванням порожній список
+    let filteredDocs = [];
 
+    // Якщо doc.json існує — читаємо його.
     if (!err) {
       try {
         const parsedData = JSON.parse(data);
-        const allDocs = parsedData.items || [];
-        // ФІЛЬТРУЄМО: залишаємо тільки ті документи, категорія яких дорівнює назві сторінки!
-        filteredDocs = allDocs.filter((doc) => doc.category === page);
+        const allDocs = Array.isArray(parsedData.items)
+          ? parsedData.items
+          : [];
+
+        filteredDocs = allDocs.filter(
+          (doc) => doc && doc.category === page
+        );
       } catch (e) {
-        console.error("Помилка парсингу документів:", e);
+        console.error("Помилка парсингу doc.json:", e);
+        // Не падаємо — просто передаємо порожній список.
+        filteredDocs = [];
       }
+    } else {
+      console.error("Не вдалося прочитати doc.json:", err.message);
     }
 
-    // Рендеримо сторінку і передаємо їй відфільтровані документи у змінну docsList
+    // Спробувати відрендерити відповідний EJS-шаблон.
     res.render(page, { docsList: filteredDocs }, (renderErr, html) => {
       if (renderErr) {
-        console.error(`Сторінку ${page}.ejs не знайдено.`);
-        res.status(404).send("<h1>Помилка 404: Сторінку не знайдено</h1>");
-      } else {
-        res.send(html);
+        console.error(
+          `Сторінку "${page}.ejs" не знайдено або не вдалося відрендерити:`,
+          renderErr.message
+        );
+
+        return res
+          .status(404)
+          .send("<h1>404: Сторінку не знайдено</h1>");
       }
+
+      return res.send(html);
     });
   });
 });
