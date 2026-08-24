@@ -373,13 +373,9 @@ app.get("/:pageName", (req, res, next) => {
     if (!err) {
       try {
         const parsedData = JSON.parse(data);
-        const allDocs = Array.isArray(parsedData.items)
-          ? parsedData.items
-          : [];
+        const allDocs = Array.isArray(parsedData.items) ? parsedData.items : [];
 
-        filteredDocs = allDocs.filter(
-          (doc) => doc && doc.category === page
-        );
+        filteredDocs = allDocs.filter((doc) => doc && doc.category === page);
       } catch (e) {
         console.error("Помилка парсингу doc.json:", e);
         // Не падаємо — просто передаємо порожній список.
@@ -394,12 +390,10 @@ app.get("/:pageName", (req, res, next) => {
       if (renderErr) {
         console.error(
           `Сторінку "${page}.ejs" не знайдено або не вдалося відрендерити:`,
-          renderErr.message
+          renderErr.message,
         );
 
-        return res
-          .status(404)
-          .send("<h1>404: Сторінку не знайдено</h1>");
+        return res.status(404).send("<h1>404: Сторінку не знайдено</h1>");
       }
 
       return res.send(html);
@@ -466,7 +460,7 @@ app.post("/github-webhook", (req, res) => {
   const logFile = path.join(__dirname, "git-error.txt");
 
   exec(
-    "git pull",
+    "git pull --ff-only",
     {
       cwd: __dirname,
       env: {
@@ -489,8 +483,12 @@ app.post("/github-webhook", (req, res) => {
         stderr,
       ].join("\n");
 
-      fs.writeFileSync(logFile, result);
-    }
+      try {
+        fs.writeFileSync(logFile, result);
+      } catch (logError) {
+        console.error("Не вдалося записати git-error.txt:", logError);
+      }
+    },
   );
 });
 
