@@ -446,7 +446,8 @@ app.post("/send-message", async (req, res) => {
   }
 });
 
-// --- ВЕБХУК ДЛЯ АВТОМАТИЧНОГО ОНОВЛЕННЯ З GITHUB ---
+// --- ВЕБХУК ДЛЯ ОНОВЛЕННЯ DATA ТА ASSETS ---
+
 app.post("/github-webhook", (req, res) => {
   const secret = req.query.secret;
 
@@ -459,8 +460,10 @@ app.post("/github-webhook", (req, res) => {
 
   const logFile = path.join(__dirname, "git-error.txt");
 
+  // Отримуємо актуальний стан origin/main,
+  // але НЕ змінюємо робочі файли всього репозиторію.
   exec(
-    "git pull --ff-only",
+    "git fetch origin && git checkout origin/main -- data public/assets",
     {
       cwd: __dirname,
       env: {
@@ -486,9 +489,18 @@ app.post("/github-webhook", (req, res) => {
       try {
         fs.writeFileSync(logFile, result);
       } catch (logError) {
-        console.error("Не вдалося записати git-error.txt:", logError);
+        console.error(
+          "Не вдалося записати git-error.txt:",
+          logError
+        );
       }
-    },
+
+      if (error) {
+        console.error("Помилка оновлення data/assets:", error);
+      } else {
+        console.log("data/ та public/assets/ оновлено.");
+      }
+    }
   );
 });
 
